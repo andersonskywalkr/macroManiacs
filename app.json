@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "MacroManiacs",
+    "slug": "macromanics-app",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "macromanics",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.macromanics.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#1A082F"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "O MacroManiacs usa a câmera para escanear refeições e códigos de barras."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O MacroManiacs usa imagens para ler sua dieta e registrar check-ins."
+        }
+      ],
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
