@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { MedalBadge } from "@/components/achievements/MedalBadge";
 import { Screen } from "@/components/layout/Screen";
@@ -9,7 +10,8 @@ import { useAppTheme } from "@/store/theme.store";
 
 export default function RankingScreen() {
   const theme = useAppTheme();
-  const { data: ranking, isLoading } = useRanking();
+  const { groupId } = useLocalSearchParams<{ groupId?: string }>();
+  const { data: ranking, isLoading } = useRanking(groupId);
 
   return (
     <Screen>
@@ -33,7 +35,7 @@ export default function RankingScreen() {
                     {entry.name}
                   </Text>
                   <Text style={[styles.meta, { color: theme.colors.mutedText }]}>
-                    @{entry.username} · {entry.streak} dias · {entry.points} pts
+                    @{entry.username} · {entry.totalCheckins} check-ins · {entry.points} pts
                   </Text>
                 </View>
               </View>

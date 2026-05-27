@@ -5,6 +5,10 @@ export type AppErrorCode =
   | "unauthorized"
   | "validation_error"
   | "not_found"
+  | "conflict"
+  | "payload_too_large"
+  | "external_service_error"
+  | "service_unavailable"
   | "server_error"
   | "unknown_error";
 
@@ -43,10 +47,27 @@ export function normalizeApiError(error: unknown): AppError {
       return new AppError("Sem conexao com o servidor.", "network_error", status, data);
     }
     if (status === 401) {
-      return new AppError("Sessao expirada. Entre novamente.", "unauthorized", status, data);
+      return new AppError(message || "Login invalido. Confira e tente novamente.", "unauthorized", status, data);
     }
     if (status === 404) {
       return new AppError(message, "not_found", status, data);
+    }
+    if (status === 409) {
+      return new AppError(message, "conflict", status, data);
+    }
+    if (status === 413) {
+      return new AppError("Arquivo maior que 10 MB.", "payload_too_large", status, data);
+    }
+    if (status === 502) {
+      return new AppError(
+        "IA temporariamente indisponivel. Tente novamente em alguns minutos.",
+        "external_service_error",
+        status,
+        data,
+      );
+    }
+    if (status === 503) {
+      return new AppError(message || "Servico temporariamente indisponivel.", "service_unavailable", status, data);
     }
     if (status && status >= 400 && status < 500) {
       return new AppError(message, "validation_error", status, data);

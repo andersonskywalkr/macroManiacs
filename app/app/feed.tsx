@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from "expo-router";
 import { MessageCircle, ThumbsUp } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 import { Screen } from "@/components/layout/Screen";
@@ -9,7 +10,8 @@ import { useAppTheme } from "@/store/theme.store";
 
 export default function FeedScreen() {
   const theme = useAppTheme();
-  const { data: posts, isLoading } = useFeed();
+  const { groupId } = useLocalSearchParams<{ groupId?: string }>();
+  const { data: posts, isLoading } = useFeed(groupId);
 
   return (
     <Screen>

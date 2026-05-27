@@ -15,15 +15,29 @@ export type DietMeal = {
   macros: MacroSummary;
 };
 
+export type DietDay = {
+  day: number;
+  meals: DietMeal[];
+  dailyTargets: MacroSummary;
+};
+
 export type DietDraft = {
   id: string;
+  userId?: string;
   dailyTargets: MacroSummary;
+  days: DietDay[];
   meals: DietMeal[];
+  status?: "pending_review" | "confirmed";
+  activePlan?: boolean;
   confidence?: number;
 };
 
 export type DietPlan = {
   id: string;
+  userId?: string;
   dailyTargets: MacroSummary;
+  days: DietDay[];
   meals: DietMeal[];
+  status?: "pending_review" | "confirmed";
+  activePlan?: boolean;
 };

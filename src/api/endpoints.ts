@@ -1,60 +1,48 @@
 export const endpoints = {
+  health: "/health",
   auth: {
     register: "/auth/register",
     login: "/auth/login",
-    me: "/auth/me",
-    logout: "/auth/logout",
   },
   profile: {
-    bodyData: "/profile/body-data",
-    profile: "/profile",
-    badges: "/profile/badges",
-    medals: "/profile/medals",
-    equipMedal: "/profile/medals/equip",
-  },
-  avatar: {
-    create: "/avatar",
-    update: "/avatar",
+    user: (userId: string) => `/profile/user/${userId}`,
   },
   diet: {
-    scan: "/diet/scan",
+    extract: "/diet/extract",
+    create: "/diet",
     confirm: "/diet/confirm",
-    active: "/diet/active",
-    targets: "/diet/targets",
-    rescan: "/diet/rescan",
+    active: (userId: string) => `/diet/user/${userId}/active`,
   },
   home: {
-    home: "/home",
-    macrosToday: "/macros/today",
-    checkinsToday: "/checkins/today",
+    user: (userId: string) => `/home/user/${userId}`,
+    weekly: (userId: string) => `/home/user/${userId}/weekly`,
   },
   groups: {
     create: "/groups",
     join: "/groups/join",
-    current: "/groups/current",
+    user: (userId: string) => `/groups/user/${userId}`,
     byId: (groupId: string) => `/groups/${groupId}`,
     feed: (groupId: string) => `/groups/${groupId}/feed`,
     ranking: (groupId: string) => `/groups/${groupId}/ranking`,
-    chat: (groupId: string) => `/groups/${groupId}/chat`,
-    invite: (groupId: string) => `/groups/${groupId}/invite`,
   },
   products: {
-    barcode: (barcode: string) => `/products/barcode/${barcode}`,
-    manual: "/products/manual",
+    barcode: (barcode: string) => `/products/${barcode}`,
   },
   checkins: {
-    barcode: "/checkins/barcode",
-    plannedMeal: "/checkins/planned-meal",
-    photo: "/checkins/photo",
-    manual: "/checkins/manual",
-    byId: (checkInId: string) => `/checkins/${checkInId}`,
+    create: "/checkins",
+    today: (userId: string) => `/checkins/user/${userId}/today`,
+    recent: (userId: string) => `/checkins/user/${userId}/recent`,
+    history: (userId: string) => `/checkins/user/${userId}`,
   },
-  feed: {
-    reaction: (postId: string) => `/feed/${postId}/reactions`,
-    comments: (postId: string) => `/feed/${postId}/comments`,
+  badges: {
+    user: (userId: string) => `/badges/user/${userId}`,
   },
   achievements: {
-    list: "/achievements",
+    user: (userId: string) => `/users/${userId}/achievements`,
+  },
+  notifications: {
+    user: (userId: string) => `/notifications/user/${userId}`,
+    read: (notificationId: string) => `/notifications/${notificationId}/read`,
   },
 };
 

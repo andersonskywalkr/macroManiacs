@@ -41,10 +41,20 @@ export const mockDietDraft: DietDraft = {
       ],
     },
   ],
+  days: [],
 };
+
+mockDietDraft.days = [
+  {
+    day: 1,
+    dailyTargets: mockDietDraft.dailyTargets,
+    meals: mockDietDraft.meals,
+  },
+];
 
 export const mockDietPlan: DietPlan = {
   id: "plan_active",
   dailyTargets: mockDietDraft.dailyTargets,
   meals: mockDietDraft.meals,
+  days: mockDietDraft.days,
 };

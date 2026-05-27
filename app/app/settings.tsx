@@ -5,12 +5,14 @@ import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { ManiacButton } from "@/components/ui/ManiacButton";
 import { ManiacCard } from "@/components/ui/ManiacCard";
 import { USE_MOCKS, API_BASE_URL } from "@/constants/config";
+import { useHealthCheck } from "@/hooks/useBackendReadyData";
 import { useAppTheme, useThemeStore } from "@/store/theme.store";
 
 export default function SettingsScreen() {
   const theme = useAppTheme();
   const themeName = useThemeStore((state) => state.themeName);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
+  const health = useHealthCheck();
 
   return (
     <Screen>
@@ -45,6 +47,9 @@ export default function SettingsScreen() {
         </Text>
         <Text style={[styles.copy, { color: theme.colors.mutedText }]}>
           API: {API_BASE_URL}
+        </Text>
+        <Text style={[styles.copy, { color: theme.colors.mutedText }]}>
+          Health: {health.isSuccess ? "OK" : health.isError ? "Falhou" : "Verificando"}
         </Text>
       </ManiacCard>
     </Screen>

@@ -4,9 +4,11 @@ import type { ImageSourcePropType } from "react-native";
 import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Svg, { Circle, ClipPath, Defs, Path, Rect, Text as SvgText } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AppError } from "@/api/errors";
 import { LoadingManiac } from "@/components/ui/LoadingManiac";
-import { useDailyMacros, useProfile, useRanking } from "@/hooks/useBackendReadyData";
+import { useHome } from "@/hooks/useBackendReadyData";
 import type { MacroValue } from "@/types/macros";
+import type { Ranking } from "@/types/ranking";
 import mascot from "../../assets/images/brand/mascot-solo.png";
 import macroCarbsIcon from "../../assets/images/macros/macro-carbs.png";
 import macroFatIcon from "../../assets/images/macros/macro-fat.png";
@@ -181,8 +183,7 @@ function MacroBucket({ color, icon, letter, label, macro, unit = "g" }: MacroBuc
   );
 }
 
-function RankingPreview() {
-  const { data: ranking } = useRanking();
+function RankingPreview({ ranking }: { ranking?: Ranking }) {
   const entries = ranking?.entries.slice(0, 5) ?? [];
 
   return (
@@ -227,8 +228,15 @@ function RankingPreview() {
   );
 }
 
-function WeeklyPerformance() {
-  const bars = [72, 48, 66, 88, 86, 42, 57];
+function WeeklyPerformance({ weeklyPerformance }: { weeklyPerformance?: unknown }) {
+  const rawDays = Array.isArray((weeklyPerformance as any)?.days)
+    ? ((weeklyPerformance as any).days as Record<string, unknown>[])
+    : [];
+  const bars = Array.from({ length: 7 }, (_, index) => {
+    const day = rawDays[index];
+    const calories = day?.progress_percent as { calories?: number } | undefined;
+    return Math.max(0, Math.min(100, Math.round(calories?.calories ?? 0)));
+  });
   const labels = ["D", "S", "T", "Q", "Q", "S", "S"];
 
   return (
@@ -252,8 +260,10 @@ function WeeklyPerformance() {
 }
 
 export default function HomeScreen() {
-  const { data: macros, isLoading } = useDailyMacros();
-  const { data: profile } = useProfile();
+  const { data: home, isLoading, error } = useHome();
+  const macros = home?.macros;
+  const profile = home?.profile;
+  const noActiveDiet = error instanceof AppError && error.status === 404;
   const { width } = useWindowDimensions();
   const scale = Math.min(width / 440, 1);
   const scaledHeight = 956 * scale;
@@ -268,15 +278,27 @@ export default function HomeScreen() {
           <View pointerEvents="none" style={styles.bottomCapsule} />
           <Image source={mascot} style={styles.mascot} resizeMode="cover" />
           <Text numberOfLines={1} adjustsFontSizeToFit style={styles.greeting}>
-            Olá, {profile?.user.name ?? "Andy"}
+            Olá, {profile?.name ?? "Maniac"}
           </Text>
           <View style={styles.notification}>
             <Bell color={palette.ink} size={23} />
-            <View style={styles.notificationDot} />
+            {(home?.notifications.unreadCount ?? 0) > 0 ? (
+              <View style={styles.notificationDot} />
+            ) : null}
           </View>
         <View style={styles.macroCard}>
           <Text style={styles.sectionTitle}>Macros do Dia:</Text>
-          {isLoading || !macros ? (
+          {noActiveDiet ? (
+            <View style={styles.emptyDiet}>
+              <Text style={styles.emptyDietTitle}>Sem dieta ativa</Text>
+              <Text style={styles.emptyDietCopy}>
+                Importe ou confirme uma dieta para liberar metas, ranking e check-ins.
+              </Text>
+              <Pressable style={styles.emptyDietButton} onPress={() => router.push("/onboarding/diet-scan")}>
+                <Text style={styles.emptyDietButtonText}>Importar dieta</Text>
+              </Pressable>
+            </View>
+          ) : isLoading || !macros ? (
             <LoadingManiac />
           ) : (
             <>
@@ -320,8 +342,8 @@ export default function HomeScreen() {
         </Pressable>
 
         <View style={styles.dashboardRow}>
-          <RankingPreview />
-          <WeeklyPerformance />
+          <RankingPreview ranking={home?.ranking} />
+          <WeeklyPerformance weeklyPerformance={home?.weeklyPerformance} />
         </View>
         </View>
       </View>
@@ -687,6 +709,48 @@ const styles = StyleSheet.create(Object.assign({
     position: "absolute",
     top: 108,
     width: 383,
+  },
+  emptyDiet: {
+    alignItems: "center",
+    gap: 10,
+    left: 56,
+    position: "absolute",
+    top: 115,
+    width: 270,
+  },
+  emptyDietTitle: {
+    color: palette.ink,
+    fontFamily: "Baloo2-ExtraBold",
+    fontSize: 26,
+    fontWeight: "800",
+    lineHeight: 32,
+    textAlign: "center",
+  },
+  emptyDietCopy: {
+    color: palette.primarySoft,
+    fontFamily: "Baloo2-Bold",
+    fontSize: 15,
+    fontWeight: "700",
+    lineHeight: 20,
+    textAlign: "center",
+  },
+  emptyDietButton: {
+    alignItems: "center",
+    backgroundColor: palette.accent,
+    borderColor: palette.ink,
+    borderRadius: 14,
+    borderWidth: 2,
+    height: 44,
+    justifyContent: "center",
+    marginTop: 4,
+    paddingHorizontal: 18,
+  },
+  emptyDietButtonText: {
+    color: palette.cream,
+    fontFamily: "Baloo2-ExtraBold",
+    fontSize: 16,
+    fontWeight: "800",
+    lineHeight: 20,
   },
   sectionTitle: {
     color: palette.primarySoft,
