@@ -1,5 +1,6 @@
 import { AxiosError, create, type AxiosRequestConfig, type AxiosResponse } from "axios";
 import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 import { API_BASE_URL } from "@/constants/config";
 import { AppError, normalizeApiError } from "@/api/errors";
 
@@ -20,10 +21,32 @@ export const api = create({
   timeout: 15000,
 });
 
-api.interceptors.request.use(async (config) => {
-  const token =
+async function getStoredToken() {
+  if (Platform.OS === "web" && typeof window !== "undefined") {
+    return window.localStorage.getItem(AUTH_TOKEN_KEY) ?? window.localStorage.getItem("access_token");
+  }
+
+  return (
     (await SecureStore.getItemAsync(AUTH_TOKEN_KEY)) ??
-    (await SecureStore.getItemAsync("access_token"));
+    (await SecureStore.getItemAsync("access_token"))
+  );
+}
+
+async function clearStoredSession() {
+  if (Platform.OS === "web" && typeof window !== "undefined") {
+    window.localStorage.removeItem(AUTH_TOKEN_KEY);
+    window.localStorage.removeItem("access_token");
+    window.localStorage.removeItem(AUTH_USER_KEY);
+    return;
+  }
+
+  await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+  await SecureStore.deleteItemAsync("access_token");
+  await SecureStore.deleteItemAsync(AUTH_USER_KEY);
+}
+
+api.interceptors.request.use(async (config) => {
+  const token = await getStoredToken();
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -36,9 +59,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error?.response?.status === 401) {
-      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
-      await SecureStore.deleteItemAsync("access_token");
-      await SecureStore.deleteItemAsync(AUTH_USER_KEY);
+      await clearStoredSession();
     }
 
     return Promise.reject(normalizeApiError(error));

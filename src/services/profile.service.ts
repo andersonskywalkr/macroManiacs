@@ -3,10 +3,11 @@ import { endpoints } from "@/api/endpoints";
 import { mapAvatar, mapBadge, mapMedal, mapUser } from "@/api/mappers";
 import type { ApiAchievementSummary, ApiBadge, ApiUser } from "@/api/dtos";
 import { AppError } from "@/api/errors";
-import { apiGet, apiPatch } from "@/lib/api";
+import { apiGet, apiPatch, apiPost } from "@/lib/api";
 import { mockBadges, mockMedals } from "@/mocks/achievements.mock";
 import { mockAvatar, mockUser } from "@/mocks/user.mock";
 import { getCurrentUserId } from "@/services/session.service";
+import { Platform } from "react-native";
 import type { Badge, Medal } from "@/types/achievements";
 import type { Avatar } from "@/types/avatar";
 import type { User } from "@/types/user";
@@ -18,6 +19,13 @@ export type ProfileSummary = {
   medals: Medal[];
 };
 
+export type AvatarUploadPayload = {
+  uri: string;
+  name?: string;
+  mimeType?: string;
+  userId?: string;
+};
+
 const mockProfileService = {
   getProfile: async (): Promise<ProfileSummary> => ({
     user: mockUser,
@@ -26,6 +34,7 @@ const mockProfileService = {
     medals: mockMedals,
   }),
   updateAvatar: async (_avatar: string | null): Promise<User> => mockUser,
+  uploadAvatar: async (_payload: AvatarUploadPayload): Promise<User> => mockUser,
 };
 
 async function getAchievementsForProfile(userId: string) {
@@ -43,6 +52,24 @@ async function getAchievementsForProfile(userId: string) {
     const badges = await apiGet<ApiBadge[]>(endpoints.badges.user(userId));
     return { badges: badges.map(mapBadge), medals: [] };
   }
+}
+
+async function appendAvatarFile(formData: FormData, payload: AvatarUploadPayload) {
+  const name = payload.name ?? "avatar.jpg";
+  const mimeType = payload.mimeType ?? "image/jpeg";
+
+  if (Platform.OS === "web") {
+    const response = await fetch(payload.uri);
+    const blob = await response.blob();
+    formData.append("file", new File([blob], name, { type: mimeType }));
+    return;
+  }
+
+  formData.append("file", {
+    uri: payload.uri,
+    name,
+    type: mimeType,
+  } as unknown as Blob);
 }
 
 const apiProfileService = {
@@ -64,6 +91,13 @@ const apiProfileService = {
   updateAvatar: async (avatar: string | null, userId?: string): Promise<User> => {
     const safeUserId = userId ?? (await getCurrentUserId());
     const profile = await apiPatch<ApiUser>(endpoints.profile.user(safeUserId), { avatar });
+    return mapUser(profile);
+  },
+  uploadAvatar: async (payload: AvatarUploadPayload): Promise<User> => {
+    const safeUserId = payload.userId ?? (await getCurrentUserId());
+    const formData = new FormData();
+    await appendAvatarFile(formData, payload);
+    const profile = await apiPost<ApiUser>(endpoints.profile.avatar(safeUserId), formData);
     return mapUser(profile);
   },
 };

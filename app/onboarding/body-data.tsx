@@ -63,7 +63,7 @@ export default function BodyDataScreen() {
         </Text>
       </View>
       <ManiacButton
-        label="Escanear dieta"
+        label="Cadastrar metas"
         loading={saveMutation.isPending}
         onPress={() => saveMutation.mutate()}
       />

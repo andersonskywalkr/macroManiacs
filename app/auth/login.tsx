@@ -18,9 +18,11 @@ export default function LoginScreen() {
   const setUser = useAuthStore((state) => state.setUser);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
   const loginMutation = useMutation({
-    mutationFn: () => authService.login({ email, password }),
+    mutationFn: () => authService.login({ email: email.trim(), password }),
     onSuccess: async (user) => {
+      setFormError(null);
       await setUser(user);
       try {
         await dietService.getActiveDiet(user.id);
@@ -37,9 +39,12 @@ export default function LoginScreen() {
       }
     },
     onError: (error) => {
+      const message =
+        error instanceof Error ? error.message : "Confira seus dados e tente novamente.";
+      setFormError(message);
       Alert.alert(
         "Nao foi possivel entrar",
-        error instanceof Error ? error.message : "Confira seus dados e tente novamente.",
+        message,
       );
     },
   });
@@ -67,6 +72,9 @@ export default function LoginScreen() {
           secureTextEntry
           value={password}
         />
+        {formError ? (
+          <Text style={[styles.error, { color: theme.colors.danger }]}>{formError}</Text>
+        ) : null}
         <ManiacButton
           icon={<Dumbbell color="#FFFFFF" size={18} />}
           label="Entrar"
@@ -101,6 +109,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "900",
     marginTop: 18,
+    textAlign: "center",
+  },
+  error: {
+    fontSize: 13,
+    fontWeight: "900",
+    lineHeight: 18,
     textAlign: "center",
   },
 });

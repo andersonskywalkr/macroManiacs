@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { Crown } from "lucide-react-native";
 import type { Avatar } from "@/types/avatar";
 import { useAppTheme } from "@/store/theme.store";
@@ -10,6 +10,10 @@ type AvatarPreviewProps = {
 
 export function AvatarPreview({ avatar, size = 96 }: AvatarPreviewProps) {
   const theme = useAppTheme();
+  const avatarUri =
+    typeof avatar?.accessory === "string" && avatar.accessory.startsWith("http")
+      ? avatar.accessory
+      : null;
 
   return (
     <View
@@ -23,10 +27,14 @@ export function AvatarPreview({ avatar, size = 96 }: AvatarPreviewProps) {
         },
       ]}
     >
-      <View style={[styles.face, { backgroundColor: theme.colors.backgroundAlt }]}>
-        <Text style={[styles.eyes, { color: theme.colors.text }]}>^ ^</Text>
-        <Text style={[styles.mouth, { color: theme.colors.accent }]}>w</Text>
-      </View>
+      {avatarUri ? (
+        <Image source={{ uri: avatarUri }} style={styles.photo} resizeMode="cover" />
+      ) : (
+        <View style={[styles.face, { backgroundColor: theme.colors.backgroundAlt }]}>
+          <Text style={[styles.eyes, { color: theme.colors.text }]}>^ ^</Text>
+          <Text style={[styles.mouth, { color: theme.colors.accent }]}>w</Text>
+        </View>
+      )}
       {avatar?.equippedMedals.length ? (
         <View style={[styles.medal, { backgroundColor: theme.colors.accent }]}>
           <Crown color="#000000" size={14} />
@@ -42,6 +50,11 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 3,
     justifyContent: "center",
+    overflow: "hidden",
+  },
+  photo: {
+    height: "100%",
+    width: "100%",
   },
   face: {
     alignItems: "center",

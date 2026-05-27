@@ -1,5 +1,5 @@
 import { router, type Href } from "expo-router";
-import { ClipboardList, Keyboard, MessageSquareText, ScanBarcode } from "lucide-react-native";
+import { History, Keyboard, ScanBarcode } from "lucide-react-native";
 import { StyleSheet, View } from "react-native";
 import { CheckInOptionCard } from "@/components/checkin/CheckInOptionCard";
 import { Screen } from "@/components/layout/Screen";
@@ -13,22 +13,16 @@ const options = [
     route: "/app/barcode-scanner" as Href,
   },
   {
-    title: "Refeicao planejada",
-    copy: "Confirma almoco, jantar ou lanche da dieta.",
-    icon: ClipboardList,
-    route: "/app/planned-meal" as Href,
-  },
-  {
-    title: "Texto livre",
-    copy: "Descreve o prato para a IA estimar os macros.",
-    icon: MessageSquareText,
-    route: "/app/photo-check-in" as Href,
-  },
-  {
     title: "Manual",
     copy: "Registra na mao quando o produto some do mapa.",
     icon: Keyboard,
     route: "/app/manual-check-in" as Href,
+  },
+  {
+    title: "Repetir refeicao",
+    copy: "Puxa um check-in recente e registra de novo.",
+    icon: History,
+    route: "/app/repeat-check-in" as Href,
   },
 ];
 

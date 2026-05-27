@@ -1,18 +1,70 @@
+import * as ImagePicker from "expo-image-picker";
 import { Moon, Sun } from "lucide-react-native";
-import { StyleSheet, Text } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { Screen } from "@/components/layout/Screen";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { ManiacButton } from "@/components/ui/ManiacButton";
 import { ManiacCard } from "@/components/ui/ManiacCard";
-import { USE_MOCKS, API_BASE_URL } from "@/constants/config";
-import { useHealthCheck } from "@/hooks/useBackendReadyData";
+import { useUpdateAvatar, useUploadAvatar } from "@/hooks/useBackendReadyData";
 import { useAppTheme, useThemeStore } from "@/store/theme.store";
 
 export default function SettingsScreen() {
   const theme = useAppTheme();
   const themeName = useThemeStore((state) => state.themeName);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
-  const health = useHealthCheck();
+  const updateAvatar = useUpdateAvatar();
+  const uploadAvatar = useUploadAvatar();
+
+  function removeAvatar() {
+    updateAvatar.mutate(null, {
+      onSuccess: () => {
+        Alert.alert("Perfil atualizado", "Avatar removido com sucesso.");
+      },
+      onError: (error) => {
+        Alert.alert(
+          "Nao foi possivel atualizar",
+          error instanceof Error ? error.message : "Tente novamente.",
+        );
+      },
+    });
+  }
+
+  async function pickAvatar() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permissao necessaria", "Libere acesso a galeria para escolher o avatar.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      mediaTypes: ["images"],
+      quality: 0.85,
+    });
+
+    if (result.canceled || !result.assets[0]) {
+      return;
+    }
+
+    const asset = result.assets[0];
+    uploadAvatar.mutate(
+      {
+        uri: asset.uri,
+        name: asset.fileName ?? "avatar.jpg",
+        mimeType: asset.mimeType ?? "image/jpeg",
+      },
+      {
+        onSuccess: () => Alert.alert("Perfil atualizado", "Avatar enviado com sucesso."),
+        onError: (error) => {
+          Alert.alert(
+            "Nao foi possivel enviar",
+            error instanceof Error ? error.message : "Tente novamente.",
+          );
+        },
+      },
+    );
+  }
 
   return (
     <Screen>
@@ -39,18 +91,23 @@ export default function SettingsScreen() {
         />
       </ManiacCard>
       <ManiacCard style={styles.card}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>
-          Integracao
-        </Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Avatar</Text>
         <Text style={[styles.copy, { color: theme.colors.mutedText }]}>
-          USE_MOCKS: {String(USE_MOCKS)}
+          Envie uma imagem do dispositivo para atualizar sua foto de perfil.
         </Text>
-        <Text style={[styles.copy, { color: theme.colors.mutedText }]}>
-          API: {API_BASE_URL}
-        </Text>
-        <Text style={[styles.copy, { color: theme.colors.mutedText }]}>
-          Health: {health.isSuccess ? "OK" : health.isError ? "Falhou" : "Verificando"}
-        </Text>
+        <View style={styles.actions}>
+          <ManiacButton
+            label="Escolher imagem"
+            loading={uploadAvatar.isPending}
+            onPress={pickAvatar}
+          />
+          <ManiacButton
+            label="Remover avatar"
+            loading={updateAvatar.isPending}
+            onPress={removeAvatar}
+            variant="secondary"
+          />
+        </View>
       </ManiacCard>
     </Screen>
   );
@@ -68,5 +125,8 @@ const styles = StyleSheet.create({
   copy: {
     fontSize: 14,
     fontWeight: "700",
+  },
+  actions: {
+    gap: 10,
   },
 });

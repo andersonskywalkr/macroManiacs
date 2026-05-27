@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { ChevronRight, PlusCircle, Ticket, Trophy, UsersRound } from "lucide-react-native";
+import { ChevronRight, Flag, PlusCircle, Ticket, Trophy, UsersRound } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ActionRow, DesignScaffold, MetricTile, ScaffoldCard } from "@/components/layout/DesignScaffold";
 import { LoadingManiac } from "@/components/ui/LoadingManiac";
@@ -110,6 +110,12 @@ export default function GroupScreen() {
 
       <ScaffoldCard title="Ações">
         <View style={styles.list}>
+          <ActionRow
+            icon={<Flag color={theme.colors.accent} size={22} />}
+            label="Meus desafios"
+            meta="Acompanhe os desafios em que voce esta participando."
+            onPress={() => router.push("/app/challenges")}
+          />
           <ActionRow
             icon={<PlusCircle color={theme.colors.accent} size={22} />}
             label="Criar ou entrar em grupo"

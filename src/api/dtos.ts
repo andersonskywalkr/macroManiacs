@@ -284,6 +284,60 @@ export type ApiGroup = {
   badges_unlocked?: ApiBadge[];
 };
 
+export type ApiChallengeType =
+  | "daily_checkin"
+  | "water_goal"
+  | "protein_goal"
+  | "calorie_goal"
+  | "no_ultra_processed"
+  | "breakfast_checkin"
+  | "manual";
+
+export type ApiChallengeProgress = {
+  challenge_id?: ApiId;
+  group_id?: ApiId;
+  user_id?: ApiId;
+  current_progress?: number;
+  goal?: number;
+  completed?: boolean;
+  reward_claimed?: boolean;
+};
+
+export type ApiChallengeParticipant = {
+  user_id?: ApiId;
+  id?: ApiId;
+  _id?: ApiId;
+  name?: string;
+  username?: string;
+  avatar?: string | null;
+  current_progress?: number;
+  progress?: number;
+  completed?: boolean;
+};
+
+export type ApiChallenge = {
+  id?: ApiId;
+  _id?: ApiId;
+  challenge_id?: ApiId;
+  group_id?: ApiId;
+  group_name?: string;
+  created_by?: ApiId;
+  title?: string;
+  description?: string;
+  type?: ApiChallengeType;
+  goal?: number;
+  reward_points?: number;
+  participants_count?: number;
+  status?: "active" | "finished" | "expired";
+  end_date?: string;
+  days_remaining?: number;
+  current_progress?: number;
+  completed?: boolean;
+  user_progress?: ApiChallengeProgress | null;
+  participants?: ApiChallengeParticipant[];
+  ranking?: ApiChallengeParticipant[];
+};
+
 export type ApiChatMessage = {
   id?: ApiId;
   _id?: ApiId;

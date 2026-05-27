@@ -6,6 +6,7 @@ export const endpoints = {
   },
   profile: {
     user: (userId: string) => `/profile/user/${userId}`,
+    avatar: (userId: string) => `/profile/user/${userId}/avatar`,
   },
   diet: {
     extract: "/diet/extract",
@@ -22,8 +23,18 @@ export const endpoints = {
     join: "/groups/join",
     user: (userId: string) => `/groups/user/${userId}`,
     byId: (groupId: string) => `/groups/${groupId}`,
+    challenges: (groupId: string) => `/groups/${groupId}/challenges`,
     feed: (groupId: string) => `/groups/${groupId}/feed`,
     ranking: (groupId: string) => `/groups/${groupId}/ranking`,
+    chat: (groupId: string) => `/groups/${groupId}/chat`,
+  },
+  challenges: {
+    byId: (challengeId: string) => `/challenges/${challengeId}`,
+    join: (challengeId: string) => `/challenges/${challengeId}/join`,
+    progress: (challengeId: string) => `/challenges/${challengeId}/progress`,
+    finish: (challengeId: string) => `/challenges/${challengeId}/finish`,
+    user: (userId: string) => `/users/${userId}/challenges`,
+    userCompleted: (userId: string) => `/users/${userId}/challenges/completed`,
   },
   products: {
     barcode: (barcode: string) => `/products/${barcode}`,

@@ -83,18 +83,24 @@ export default function AppTabsLayout() {
       />
       <Tabs.Screen name="macros" options={{ href: null }} />
       <Tabs.Screen name="check-in" options={{ href: null }} />
+      <Tabs.Screen name="checkin-history" options={{ href: null }} />
       <Tabs.Screen name="ranking" options={{ href: null }} />
       <Tabs.Screen name="barcode-scanner" options={{ href: null }} />
       <Tabs.Screen name="product-review" options={{ href: null }} />
       <Tabs.Screen name="planned-meal" options={{ href: null }} />
       <Tabs.Screen name="manual-check-in" options={{ href: null }} />
+      <Tabs.Screen name="repeat-check-in" options={{ href: null }} />
       <Tabs.Screen name="photo-check-in" options={{ href: null }} />
       <Tabs.Screen name="check-in-success" options={{ href: null }} />
       <Tabs.Screen name="feed" options={{ href: null }} />
       <Tabs.Screen name="chat" options={{ href: null }} />
+      <Tabs.Screen name="challenges" options={{ href: null }} />
+      <Tabs.Screen name="challenge-detail/[challengeId]" options={{ href: null }} />
+      <Tabs.Screen name="create-challenge" options={{ href: null }} />
       <Tabs.Screen name="diet" options={{ href: null }} />
       <Tabs.Screen name="group-detail/[groupId]" options={{ href: null }} />
       <Tabs.Screen name="medals" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
       <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
   );
