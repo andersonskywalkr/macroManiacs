@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Sparkles } from "lucide-react-native";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { Screen } from "@/components/layout/Screen";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { ManiacButton } from "@/components/ui/ManiacButton";
@@ -14,17 +14,37 @@ import { useAppTheme } from "@/store/theme.store";
 export default function RegisterScreen() {
   const theme = useAppTheme();
   const setUser = useAuthStore((state) => state.setUser);
-  const [name, setName] = useState("Rafael");
-  const [username, setUsername] = useState("rafael");
-  const [email, setEmail] = useState("rafael@macro.app");
-  const [password, setPassword] = useState("123456");
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const registerMutation = useMutation({
     mutationFn: () => authService.register({ name, username, email, password }),
-    onSuccess: (user) => {
-      setUser(user);
-      router.push("/onboarding/avatar");
+    onSuccess: async (user) => {
+      await setUser(user);
+      router.replace("/onboarding/diet-scan");
+    },
+    onError: (error) => {
+      Alert.alert(
+        "Nao foi possivel criar a conta",
+        error instanceof Error ? error.message : "Revise os dados e tente novamente.",
+      );
     },
   });
+
+  function handleRegister() {
+    if (!name.trim() || !username.trim() || !email.trim() || !password.trim()) {
+      Alert.alert("Complete o cadastro", "Preencha nome, username, e-mail e senha.");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Senha curta", "A senha precisa ter pelo menos 6 caracteres.");
+      return;
+    }
+
+    registerMutation.mutate();
+  }
 
   return (
     <Screen>
@@ -63,9 +83,9 @@ export default function RegisterScreen() {
         </Text>
         <ManiacButton
           icon={<Sparkles color="#FFFFFF" size={18} />}
-          label="Criar avatar"
+          label="Criar conta"
           loading={registerMutation.isPending}
-          onPress={() => registerMutation.mutate()}
+          onPress={handleRegister}
         />
       </View>
     </Screen>

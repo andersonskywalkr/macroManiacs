@@ -1,18 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { CheckCircle2 } from "lucide-react-native";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { Screen } from "@/components/layout/Screen";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { MacroProgressBar } from "@/components/macros/MacroProgressBar";
 import { ManiacButton } from "@/components/ui/ManiacButton";
 import { ManiacCard } from "@/components/ui/ManiacCard";
 import { LoadingManiac } from "@/components/ui/LoadingManiac";
+import { useConfirmDiet } from "@/hooks/useBackendReadyData";
 import { dietService } from "@/services/diet.service";
 import { useAppTheme } from "@/store/theme.store";
 
 export default function DietReviewScreen() {
   const theme = useAppTheme();
+  const confirmMutation = useConfirmDiet();
   const { data: draft, isLoading } = useQuery({
     queryKey: ["diet-draft"],
     queryFn: dietService.getDraft,
@@ -95,7 +97,18 @@ export default function DietReviewScreen() {
           <ManiacButton
             icon={<CheckCircle2 color="#FFFFFF" size={18} />}
             label="Confirmar dieta"
-            onPress={() => router.push("/onboarding/group-entry")}
+            loading={confirmMutation.isPending}
+            onPress={() =>
+              confirmMutation.mutate(draft, {
+                onSuccess: () => router.replace("/app/home"),
+                onError: (error) => {
+                  Alert.alert(
+                    "Nao foi possivel confirmar",
+                    error instanceof Error ? error.message : "Revise a dieta e tente novamente.",
+                  );
+                },
+              })
+            }
           />
         </>
       )}

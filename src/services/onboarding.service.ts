@@ -1,9 +1,8 @@
 import { USE_MOCKS } from "@/constants/config";
-import { endpoints } from "@/api/endpoints";
-import { mapAvatar, mapUser, unwrap } from "@/api/mappers";
-import type { ApiAvatar, ApiEnvelope, ApiUser } from "@/api/dtos";
-import { api } from "@/lib/api";
+import { mapAvatar } from "@/api/mappers";
 import { mockAvatar, mockUser } from "@/mocks/user.mock";
+import { profileService } from "@/services/profile.service";
+import { getStoredUser } from "@/services/session.service";
 import type { Avatar } from "@/types/avatar";
 import type { User } from "@/types/user";
 
@@ -21,15 +20,17 @@ const mockOnboardingService = {
 
 const apiOnboardingService = {
   saveAvatar: async (): Promise<Avatar> => {
-    const response = await api.post<ApiEnvelope<ApiAvatar>>(endpoints.avatar.create);
-    return mapAvatar(unwrap(response.data));
+    const user = await profileService.updateAvatar(null);
+    return mapAvatar(user.avatar, user.id);
   },
-  saveBodyData: async (payload: BodyDataPayload): Promise<User> => {
-    const response = await api.post<ApiEnvelope<ApiUser>>(endpoints.profile.bodyData, payload);
-    return mapUser(unwrap(response.data));
+  saveBodyData: async (_payload: BodyDataPayload): Promise<User> => {
+    const user = await getStoredUser();
+    if (!user) {
+      throw new Error("Usuario nao autenticado.");
+    }
+
+    return user;
   },
 };
 
-export const onboardingService = USE_MOCKS
-  ? mockOnboardingService
-  : apiOnboardingService;
+export const onboardingService = USE_MOCKS ? mockOnboardingService : apiOnboardingService;

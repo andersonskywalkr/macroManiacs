@@ -2,25 +2,45 @@ import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Apple, Dumbbell, Mail } from "lucide-react-native";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Screen } from "@/components/layout/Screen";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { ManiacButton } from "@/components/ui/ManiacButton";
 import { ManiacInput } from "@/components/ui/ManiacInput";
+import { AppError } from "@/api/errors";
 import { authService } from "@/services/auth.service";
+import { dietService } from "@/services/diet.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useAppTheme } from "@/store/theme.store";
 
 export default function LoginScreen() {
   const theme = useAppTheme();
   const setUser = useAuthStore((state) => state.setUser);
-  const [email, setEmail] = useState("rafael@macro.app");
-  const [password, setPassword] = useState("123456");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const loginMutation = useMutation({
     mutationFn: () => authService.login({ email, password }),
-    onSuccess: (user) => {
-      setUser(user);
-      router.replace(user.onboardingCompleted ? "/app/home" : "/onboarding/avatar");
+    onSuccess: async (user) => {
+      await setUser(user);
+      try {
+        await dietService.getActiveDiet(user.id);
+        router.replace("/app/home");
+      } catch (error) {
+        if (error instanceof AppError && error.status === 404) {
+          router.replace("/onboarding/diet-scan");
+          return;
+        }
+        Alert.alert(
+          "Nao foi possivel carregar sua dieta",
+          error instanceof Error ? error.message : "Tente novamente.",
+        );
+      }
+    },
+    onError: (error) => {
+      Alert.alert(
+        "Nao foi possivel entrar",
+        error instanceof Error ? error.message : "Confira seus dados e tente novamente.",
+      );
     },
   });
 

@@ -1,12 +1,11 @@
 import { useEffect } from "react";
 import { router } from "expo-router";
-import { StyleSheet, Text } from "react-native";
-import { AvatarPreview } from "@/components/avatar/AvatarPreview";
+import { Image, StyleSheet, Text } from "react-native";
 import { Screen } from "@/components/layout/Screen";
 import { LoadingManiac } from "@/components/ui/LoadingManiac";
 import { ManiacCard } from "@/components/ui/ManiacCard";
-import { mockAvatar } from "@/mocks/user.mock";
 import { useAppTheme } from "@/store/theme.store";
+import mascotHead from "../../assets/images/brand/mascot-head.png";
 
 export default function DietProcessingScreen() {
   const theme = useAppTheme();
@@ -22,7 +21,7 @@ export default function DietProcessingScreen() {
   return (
     <Screen scroll={false}>
       <ManiacCard strong style={styles.card}>
-        <AvatarPreview avatar={mockAvatar} size={132} />
+        <Image source={mascotHead} style={styles.mascot} resizeMode="cover" />
         <Text style={[styles.title, { color: theme.colors.text }]}>
           IA lendo sua dieta.
         </Text>
@@ -53,5 +52,9 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 10,
     textAlign: "center",
+  },
+  mascot: {
+    height: 132,
+    width: 132,
   },
 });

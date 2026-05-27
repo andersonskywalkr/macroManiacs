@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { CheckCircle2 } from "lucide-react-native";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { Screen } from "@/components/layout/Screen";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { ManiacButton } from "@/components/ui/ManiacButton";
@@ -67,6 +67,12 @@ export default function ManualCheckInScreen() {
             },
             {
             onSuccess: () => router.push("/app/check-in-success"),
+            onError: (error) => {
+              Alert.alert(
+                "Nao foi possivel registrar",
+                error instanceof Error ? error.message : "Tente novamente.",
+              );
+            },
             },
           )
         }

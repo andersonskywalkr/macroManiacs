@@ -1,24 +1,33 @@
 import { router, type Href, useLocalSearchParams } from "expo-router";
 import { CheckCircle2, PackageCheck } from "lucide-react-native";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
 import { Screen } from "@/components/layout/Screen";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { ManiacButton } from "@/components/ui/ManiacButton";
 import { ManiacCard } from "@/components/ui/ManiacCard";
 import { LoadingManiac } from "@/components/ui/LoadingManiac";
+import { ManiacInput } from "@/components/ui/ManiacInput";
 import { useBarcodeCheckIn, useProduct } from "@/hooks/useBackendReadyData";
 import { useAppTheme } from "@/store/theme.store";
 
 export default function ProductReviewScreen() {
   const theme = useAppTheme();
   const params = useLocalSearchParams<{ barcode?: string }>();
-  const barcode = params.barcode ?? "7891000315507";
+  const barcode = params.barcode ?? "";
+  const [quantityG, setQuantityG] = useState("100");
   const { data: product, isLoading } = useProduct(barcode);
   const confirmMutation = useBarcodeCheckIn();
   const handleConfirm = () => {
-    confirmMutation.mutate({ barcode }, {
+    confirmMutation.mutate({ barcode, quantityG: Number(quantityG) || 100 }, {
     onSuccess: () => {
       router.push("/app/check-in-success" as Href);
+    },
+    onError: (error) => {
+      Alert.alert(
+        "Nao foi possivel registrar",
+        error instanceof Error ? error.message : "Tente novamente.",
+      );
     },
   });
   };
@@ -30,7 +39,13 @@ export default function ProductReviewScreen() {
         title="Produto encontrado."
         subtitle="Confere a porção e manda pro contador."
       />
-      {isLoading || !product ? (
+      {!barcode ? (
+        <ManiacCard>
+          <Text style={[styles.brand, { color: theme.colors.mutedText }]}>
+            Nenhum codigo de barras foi lido. Volte ao scanner e tente novamente.
+          </Text>
+        </ManiacCard>
+      ) : isLoading || !product ? (
         <LoadingManiac />
       ) : (
         <>
@@ -51,6 +66,15 @@ export default function ProductReviewScreen() {
             <MacroTile label="Proteína" value={product.proteinPer100g} unit="g" />
             <MacroTile label="Carbo" value={product.carbsPer100g} unit="g" />
             <MacroTile label="Gordura" value={product.fatPer100g} unit="g" />
+          </View>
+
+          <View style={styles.quantity}>
+            <ManiacInput
+              keyboardType="number-pad"
+              label="Quantidade consumida (g)"
+              onChangeText={setQuantityG}
+              value={quantityG}
+            />
           </View>
 
           <ManiacButton
@@ -115,6 +139,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
+    marginBottom: 18,
+  },
+  quantity: {
     marginBottom: 18,
   },
   tile: {

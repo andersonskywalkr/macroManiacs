@@ -8,6 +8,7 @@ export type RankingUser = {
   username: string;
   avatar?: Avatar | null;
   points: number;
+  totalCheckins: number;
   streak: number;
   medals: Medal[];
   isCurrentUser: boolean;

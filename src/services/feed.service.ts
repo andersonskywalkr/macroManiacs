@@ -1,8 +1,9 @@
 import { USE_MOCKS } from "@/constants/config";
 import { endpoints } from "@/api/endpoints";
-import { mapFeedPost, unwrap } from "@/api/mappers";
-import type { ApiEnvelope, ApiFeedPost } from "@/api/dtos";
-import { api } from "@/lib/api";
+import { mapFeedPost } from "@/api/mappers";
+import type { ApiFeedPost } from "@/api/dtos";
+import { apiGet } from "@/lib/api";
+import { groupService } from "@/services/group.service";
 import { useDemoStore } from "@/store/demo.store";
 import type { FeedPost } from "@/types/feed";
 
@@ -11,9 +12,17 @@ const mockFeedService = {
 };
 
 const apiFeedService = {
-  getGroupFeed: async (groupId = "current"): Promise<FeedPost[]> => {
-    const response = await api.get<ApiEnvelope<ApiFeedPost[]>>(endpoints.groups.feed(groupId));
-    return unwrap(response.data).map(mapFeedPost);
+  getGroupFeed: async (groupId?: string, limit = 20): Promise<FeedPost[]> => {
+    const currentGroup = groupId ? null : await groupService.getCurrentGroup().catch(() => null);
+    const safeGroupId = groupId ?? currentGroup?.id ?? "";
+    if (!safeGroupId) {
+      return [];
+    }
+
+    const response = await apiGet<ApiFeedPost[]>(
+      `${endpoints.groups.feed(safeGroupId)}?limit=${limit}`,
+    );
+    return response.map(mapFeedPost);
   },
 };
 

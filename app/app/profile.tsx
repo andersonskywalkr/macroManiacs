@@ -1,11 +1,14 @@
 import { router } from "expo-router";
+import { Award, Settings, ShieldCheck, UserRound } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 import { MedalBadge } from "@/components/achievements/MedalBadge";
 import { AvatarPreview } from "@/components/avatar/AvatarPreview";
-import { Screen } from "@/components/layout/Screen";
-import { ScreenHeader } from "@/components/layout/ScreenHeader";
-import { ManiacButton } from "@/components/ui/ManiacButton";
-import { ManiacCard } from "@/components/ui/ManiacCard";
+import {
+  ActionRow,
+  DesignScaffold,
+  MetricTile,
+  ScaffoldCard,
+} from "@/components/layout/DesignScaffold";
 import { LoadingManiac } from "@/components/ui/LoadingManiac";
 import { useProfile } from "@/hooks/useBackendReadyData";
 import { useAppTheme } from "@/store/theme.store";
@@ -13,85 +16,138 @@ import { useAppTheme } from "@/store/theme.store";
 export default function ProfileScreen() {
   const theme = useAppTheme();
   const { data: profile, isLoading } = useProfile();
+  const equippedMedals = profile?.medals.filter((medal) => medal.equipped) ?? [];
+  const unlockedMedals = profile?.medals.filter((medal) => medal.unlocked).length ?? 0;
 
   return (
-    <Screen>
-      <ScreenHeader
-        eyebrow="Perfil"
-        title="Seu avatar no jogo."
-        subtitle="Medalhas, badges e status de maniac."
-      />
+    <DesignScaffold
+      eyebrow="Perfil"
+      title="Dados e configurações"
+      subtitle="Central do usuário, avatar, conquistas e ajustes da conta."
+    >
       {isLoading || !profile ? (
-        <LoadingManiac />
+        <ScaffoldCard>
+          <LoadingManiac />
+        </ScaffoldCard>
       ) : (
         <>
-          <ManiacCard strong style={styles.hero}>
-            <AvatarPreview avatar={profile.avatar} size={132} />
-            <Text style={[styles.name, { color: theme.colors.text }]}>
-              {profile.user.name}
-            </Text>
-            <Text style={[styles.username, { color: theme.colors.mutedText }]}>
-              @{profile.user.username} · Hoje voce nao foi frango.
-            </Text>
-          </ManiacCard>
-          <Text style={[styles.section, { color: theme.colors.text }]}>
-            Medalhas equipadas
-          </Text>
-          <View style={styles.medals}>
-            {profile.medals.map((medal) => (
-              <MedalBadge key={medal.id} medal={medal} />
-            ))}
-          </View>
-          <View style={styles.actions}>
-            <ManiacButton
-              label="Ver medalhas"
-              onPress={() => router.push("/app/medals")}
-            />
-            <ManiacButton
-              label="Ver dieta"
-              onPress={() => router.push("/app/diet")}
-              variant="secondary"
-            />
-            <ManiacButton
-              label="Configuracoes"
-              onPress={() => router.push("/app/settings")}
-              variant="secondary"
-            />
-          </View>
+          <ScaffoldCard>
+            <View style={styles.profileHero}>
+              <AvatarPreview avatar={profile.avatar} size={124} />
+              <View style={styles.profileCopy}>
+                <Text style={[styles.name, { color: theme.colors.text }]}>{profile.user.name}</Text>
+                <Text style={[styles.username, { color: theme.colors.mutedText }]}>
+                  @{profile.user.username}
+                </Text>
+                {profile.user.email ? (
+                  <Text style={[styles.email, { color: theme.colors.mutedText }]}>{profile.user.email}</Text>
+                ) : null}
+              </View>
+            </View>
+          </ScaffoldCard>
+
+          <ScaffoldCard title="Status">
+            <View style={styles.metrics}>
+              <MetricTile accent={theme.colors.accent} label="medalhas" value={`${unlockedMedals}`} />
+              <MetricTile
+                accent={theme.colors.success}
+                label="onboarding"
+                value={profile.user.onboardingCompleted ? "OK" : "Pendente"}
+              />
+            </View>
+          </ScaffoldCard>
+
+          <ScaffoldCard title="Medalhas equipadas">
+            {equippedMedals.length > 0 ? (
+              <View style={styles.medals}>
+                {equippedMedals.map((medal) => (
+                  <MedalBadge key={medal.id} medal={medal} />
+                ))}
+              </View>
+            ) : (
+              <ActionRow
+                icon={<Award color={theme.colors.accent} size={22} />}
+                label="Nenhuma medalha equipada"
+                meta="Escolha uma medalha para destacar no perfil."
+                onPress={() => router.push("/app/medals")}
+              />
+            )}
+          </ScaffoldCard>
+
+          <ScaffoldCard title="Conta">
+            <View style={styles.stack}>
+              <ActionRow
+                icon={<Award color={theme.colors.accent} size={22} />}
+                label="Medalhas"
+                meta="Coleção, raridades e medalhas equipadas."
+                onPress={() => router.push("/app/medals")}
+              />
+              <ActionRow
+                icon={<UserRound color={theme.colors.accent} size={22} />}
+                label="Plano alimentar"
+                meta="Metas e refeições vinculadas ao perfil."
+                onPress={() => router.push("/app/meals")}
+              />
+              <ActionRow
+                icon={<Settings color={theme.colors.accent} size={22} />}
+                label="Configurações"
+                meta="Preferências, tema e dados da conta."
+                onPress={() => router.push("/app/settings")}
+              />
+              <ActionRow
+                icon={<ShieldCheck color={theme.colors.accent} size={22} />}
+                label="Privacidade"
+                meta="Controles de segurança e visibilidade."
+              />
+            </View>
+          </ScaffoldCard>
         </>
       )}
-    </Screen>
+    </DesignScaffold>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: {
+  profileHero: {
     alignItems: "center",
-    gap: 10,
+    gap: 16,
+    paddingVertical: 4,
+  },
+  profileCopy: {
+    alignItems: "center",
   },
   name: {
-    fontSize: 26,
-    fontWeight: "900",
-    marginTop: 8,
-  },
-  username: {
-    fontSize: 14,
+    fontFamily: "Baloo2-ExtraBold",
+    fontSize: 30,
     fontWeight: "800",
+    letterSpacing: 0,
+    lineHeight: 35,
     textAlign: "center",
   },
-  section: {
-    fontSize: 18,
-    fontWeight: "900",
-    marginTop: 22,
-    marginBottom: 12,
+  username: {
+    fontFamily: "Baloo2-Bold",
+    fontSize: 17,
+    fontWeight: "700",
+    lineHeight: 22,
+    marginTop: 4,
+  },
+  email: {
+    fontFamily: "Baloo2-Medium",
+    fontSize: 15,
+    fontWeight: "500",
+    lineHeight: 20,
+    marginTop: 6,
+  },
+  metrics: {
+    flexDirection: "row",
+    gap: 12,
   },
   medals: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 12,
   },
-  actions: {
-    gap: 10,
-    marginTop: 18,
+  stack: {
+    gap: 12,
   },
 });

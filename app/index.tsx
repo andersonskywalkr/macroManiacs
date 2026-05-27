@@ -1,12 +1,11 @@
 import { router } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { Dumbbell, LogIn, Sparkles, Ticket } from "lucide-react-native";
-import { AvatarPreview } from "@/components/avatar/AvatarPreview";
 import { Screen } from "@/components/layout/Screen";
 import { ManiacButton } from "@/components/ui/ManiacButton";
 import { ManiacCard } from "@/components/ui/ManiacCard";
-import { mockAvatar } from "@/mocks/user.mock";
 import { useAppTheme } from "@/store/theme.store";
+import mascotHead from "../assets/images/brand/mascot-head.png";
 
 export default function SplashScreen() {
   const theme = useAppTheme();
@@ -18,7 +17,7 @@ export default function SplashScreen() {
           <Text style={[styles.logo, { color: theme.colors.primarySoft }]}>
             MacroManiacs
           </Text>
-          <AvatarPreview avatar={mockAvatar} size={138} />
+          <Image source={mascotHead} style={styles.mascot} resizeMode="cover" />
           <Text style={[styles.title, { color: theme.colors.text }]}>
             Dieta é difícil sozinho. Com os amigos, vira jogo.
           </Text>
@@ -32,7 +31,7 @@ export default function SplashScreen() {
             Maniac mode ativado.
           </Text>
           <Text style={[styles.cardCopy, { color: theme.colors.mutedText }]}>
-            Demo rodando com mocks. Backend Flask entra depois sem travar o app.
+            Conectado ao backend Flask para cadastro, dieta, check-ins e ranking.
           </Text>
           <View style={styles.actions}>
             <ManiacButton
@@ -95,6 +94,10 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     marginTop: 14,
     textAlign: "center",
+  },
+  mascot: {
+    height: 138,
+    width: 138,
   },
   card: {
     gap: 10,

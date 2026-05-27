@@ -8,7 +8,7 @@ import type { ChatMessage } from "@/types/chat";
 import type { FeedPost } from "@/types/feed";
 import type { DailyMacros, MacroSummary, MacroValue } from "@/types/macros";
 
-type CheckInKind = "barcode" | "planned_meal" | "photo" | "manual";
+type CheckInKind = "barcode" | "planned_meal" | "photo" | "manual" | "manual_text" | "manual_macros";
 
 type DemoState = {
   dailyMacros: DailyMacros;

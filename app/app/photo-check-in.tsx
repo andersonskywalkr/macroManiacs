@@ -1,37 +1,52 @@
 import { router } from "expo-router";
-import { Camera, CheckCircle2 } from "lucide-react-native";
-import { StyleSheet, Text } from "react-native";
+import { CheckCircle2, MessageSquareText } from "lucide-react-native";
+import { useState } from "react";
+import { Alert, StyleSheet, Text } from "react-native";
 import { Screen } from "@/components/layout/Screen";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { ManiacButton } from "@/components/ui/ManiacButton";
 import { ManiacCard } from "@/components/ui/ManiacCard";
+import { ManiacInput } from "@/components/ui/ManiacInput";
 import { usePhotoCheckIn } from "@/hooks/useBackendReadyData";
 import { useAppTheme } from "@/store/theme.store";
 
 export default function PhotoCheckInScreen() {
   const theme = useAppTheme();
   const confirmMutation = usePhotoCheckIn();
+  const [description, setDescription] = useState("");
 
   return (
     <Screen>
       <ScreenHeader
-        eyebrow="Foto"
-        title="Foto do prato"
-        subtitle="No MVP mockado, a IA retorna macros estimados."
+        eyebrow="Texto livre"
+        title="Descreve o prato"
+        subtitle="A IA estima macros pelo texto e o backend registra o check-in."
       />
       <ManiacCard strong style={styles.card}>
-        <Camera color={theme.colors.accent} size={48} />
+        <MessageSquareText color={theme.colors.accent} size={48} />
         <Text style={[styles.copy, { color: theme.colors.text }]}>
-          Simulacao de foto pronta para trocar por Expo Image Picker/Camera.
+          Exemplo: 150g de frango, 100g de arroz e salada.
         </Text>
       </ManiacCard>
+      <ManiacInput
+        label="Descrição"
+        onChangeText={setDescription}
+        placeholder="O que voce comeu?"
+        value={description}
+      />
       <ManiacButton
         icon={<CheckCircle2 color="#FFFFFF" size={18} />}
-        label="Confirmar foto"
+        label="Confirmar texto"
         loading={confirmMutation.isPending}
         onPress={() =>
-          confirmMutation.mutate(undefined, {
+          confirmMutation.mutate({ description }, {
             onSuccess: () => router.push("/app/check-in-success"),
+            onError: (error) => {
+              Alert.alert(
+                "Nao foi possivel estimar",
+                error instanceof Error ? error.message : "Tente novamente em alguns minutos.",
+              );
+            },
           })
         }
       />

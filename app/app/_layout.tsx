@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { CircleUserRound, Trophy, UsersRound } from "lucide-react-native";
+import { CircleUserRound, Utensils, UsersRound } from "lucide-react-native";
 import { Image, StyleSheet, View } from "react-native";
 import { useAppTheme } from "@/store/theme.store";
 import mascotHead from "../../assets/images/brand/mascot-head.png";
@@ -49,38 +49,23 @@ export default function AppTabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="meals"
+        options={{
+          title: "Refeições",
+          tabBarIcon: ({ color, focused }) => (
+            <TabIconFrame focused={focused}>
+              <Utensils color={color} size={24} />
+            </TabIconFrame>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="group"
         options={{
-          title: "Grupo",
+          title: "Grupos",
           tabBarIcon: ({ color, focused }) => (
             <TabIconFrame focused={focused}>
               <UsersRound color={color} size={25} />
-            </TabIconFrame>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="check-in"
-        options={{
-          title: "",
-          tabBarIcon: ({ focused }) => (
-            <TabIconFrame focused={focused}>
-              <View style={styles.foodIcon}>
-              <View style={[styles.foodCircle, { backgroundColor: theme.colors.accent }]} />
-              <View style={[styles.foodCircle, styles.foodCircleGreen]} />
-              <View style={[styles.foodCircle, styles.foodCircleSalmon]} />
-            </View>
-            </TabIconFrame>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="ranking"
-        options={{
-          title: "Ranking",
-          tabBarIcon: ({ color, focused }) => (
-            <TabIconFrame focused={focused}>
-              <Trophy color={color} size={24} />
             </TabIconFrame>
           ),
         }}
@@ -97,6 +82,8 @@ export default function AppTabsLayout() {
         }}
       />
       <Tabs.Screen name="macros" options={{ href: null }} />
+      <Tabs.Screen name="check-in" options={{ href: null }} />
+      <Tabs.Screen name="ranking" options={{ href: null }} />
       <Tabs.Screen name="barcode-scanner" options={{ href: null }} />
       <Tabs.Screen name="product-review" options={{ href: null }} />
       <Tabs.Screen name="planned-meal" options={{ href: null }} />
@@ -106,6 +93,7 @@ export default function AppTabsLayout() {
       <Tabs.Screen name="feed" options={{ href: null }} />
       <Tabs.Screen name="chat" options={{ href: null }} />
       <Tabs.Screen name="diet" options={{ href: null }} />
+      <Tabs.Screen name="group-detail/[groupId]" options={{ href: null }} />
       <Tabs.Screen name="medals" options={{ href: null }} />
       <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>

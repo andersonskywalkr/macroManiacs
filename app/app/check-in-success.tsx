@@ -49,6 +49,14 @@ export default function CheckInSuccessScreen() {
         {result.unlockedMedals.map((medal) => (
           <MedalBadge key={medal.id} medal={medal} />
         ))}
+        {result.unlockedBadges.map((badge) => (
+          <ManiacCard key={badge.id}>
+            <Text style={[styles.badgeName, { color: theme.colors.text }]}>{badge.name}</Text>
+            <Text style={[styles.badgeCopy, { color: theme.colors.mutedText }]}>
+              {badge.description}
+            </Text>
+          </ManiacCard>
+        ))}
       </View>
 
       <View style={styles.actions}>
@@ -100,6 +108,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "900",
+  },
+  badgeName: {
+    fontSize: 17,
+    fontWeight: "900",
+  },
+  badgeCopy: {
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 18,
+    marginTop: 4,
   },
   actions: {
     gap: 10,

@@ -1,5 +1,5 @@
 import { router, type Href } from "expo-router";
-import { Camera, ClipboardList, Keyboard, ScanBarcode } from "lucide-react-native";
+import { ClipboardList, Keyboard, MessageSquareText, ScanBarcode } from "lucide-react-native";
 import { StyleSheet, View } from "react-native";
 import { CheckInOptionCard } from "@/components/checkin/CheckInOptionCard";
 import { Screen } from "@/components/layout/Screen";
@@ -8,7 +8,7 @@ import { ScreenHeader } from "@/components/layout/ScreenHeader";
 const options = [
   {
     title: "Codigo de barras",
-    copy: "Produto encontrado via backend Flask depois. Agora e mock.",
+    copy: "Consulta o Open Food Facts e registra a porção.",
     icon: ScanBarcode,
     route: "/app/barcode-scanner" as Href,
   },
@@ -19,9 +19,9 @@ const options = [
     route: "/app/planned-meal" as Href,
   },
   {
-    title: "Foto do prato",
-    copy: "Simula leitura por imagem para fechar o fluxo.",
-    icon: Camera,
+    title: "Texto livre",
+    copy: "Descreve o prato para a IA estimar os macros.",
+    icon: MessageSquareText,
     route: "/app/photo-check-in" as Href,
   },
   {
