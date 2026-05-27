@@ -13,7 +13,7 @@ export default function DietProcessingScreen() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       router.replace("/onboarding/diet-review");
-    }, 1200);
+    }, 800);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -23,12 +23,12 @@ export default function DietProcessingScreen() {
       <ManiacCard strong style={styles.card}>
         <Image source={mascotHead} style={styles.mascot} resizeMode="cover" />
         <Text style={[styles.title, { color: theme.colors.text }]}>
-          IA lendo sua dieta.
+          Salvando suas metas.
         </Text>
         <Text style={[styles.copy, { color: theme.colors.mutedText }]}>
-          Caçando proteína, separando carbo e marcando onde o jogo começa.
+          Preparando o contador de macros para o seu dia.
         </Text>
-        <LoadingManiac message="Caçando proteína..." />
+        <LoadingManiac message="Organizando metas..." />
       </ManiacCard>
     </Screen>
   );

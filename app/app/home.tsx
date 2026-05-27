@@ -6,7 +6,7 @@ import Svg, { Circle, ClipPath, Defs, Path, Rect, Text as SvgText } from "react-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppError } from "@/api/errors";
 import { LoadingManiac } from "@/components/ui/LoadingManiac";
-import { useHome } from "@/hooks/useBackendReadyData";
+import { useHome, useWeeklyPerformance } from "@/hooks/useBackendReadyData";
 import type { MacroValue } from "@/types/macros";
 import type { Ranking } from "@/types/ranking";
 import mascot from "../../assets/images/brand/mascot-solo.png";
@@ -261,6 +261,7 @@ function WeeklyPerformance({ weeklyPerformance }: { weeklyPerformance?: unknown 
 
 export default function HomeScreen() {
   const { data: home, isLoading, error } = useHome();
+  const { data: weeklyPerformance } = useWeeklyPerformance();
   const macros = home?.macros;
   const profile = home?.profile;
   const noActiveDiet = error instanceof AppError && error.status === 404;
@@ -280,22 +281,22 @@ export default function HomeScreen() {
           <Text numberOfLines={1} adjustsFontSizeToFit style={styles.greeting}>
             Olá, {profile?.name ?? "Maniac"}
           </Text>
-          <View style={styles.notification}>
+          <Pressable style={styles.notification} onPress={() => router.push("/app/notifications" as any)}>
             <Bell color={palette.ink} size={23} />
             {(home?.notifications.unreadCount ?? 0) > 0 ? (
               <View style={styles.notificationDot} />
             ) : null}
-          </View>
+          </Pressable>
         <View style={styles.macroCard}>
           <Text style={styles.sectionTitle}>Macros do Dia:</Text>
           {noActiveDiet ? (
             <View style={styles.emptyDiet}>
               <Text style={styles.emptyDietTitle}>Sem dieta ativa</Text>
               <Text style={styles.emptyDietCopy}>
-                Importe ou confirme uma dieta para liberar metas, ranking e check-ins.
+                Cadastre suas metas de macros para liberar o contador, ranking e check-ins.
               </Text>
               <Pressable style={styles.emptyDietButton} onPress={() => router.push("/onboarding/diet-scan")}>
-                <Text style={styles.emptyDietButtonText}>Importar dieta</Text>
+                <Text style={styles.emptyDietButtonText}>Cadastrar metas</Text>
               </Pressable>
             </View>
           ) : isLoading || !macros ? (
@@ -343,7 +344,7 @@ export default function HomeScreen() {
 
         <View style={styles.dashboardRow}>
           <RankingPreview ranking={home?.ranking} />
-          <WeeklyPerformance weeklyPerformance={home?.weeklyPerformance} />
+          <WeeklyPerformance weeklyPerformance={weeklyPerformance ?? home?.weeklyPerformance} />
         </View>
         </View>
       </View>

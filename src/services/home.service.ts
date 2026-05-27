@@ -49,6 +49,7 @@ const mockHomeService = {
     notifications: { unreadCount: 0, latest: [] },
     feedPreview: useDemoStore.getState().feedPosts,
   }),
+  getWeekly: async (): Promise<unknown> => ({ days: [] }),
 };
 
 function mapHome(data: ApiHomeResponse, currentUserId?: string): HomeDashboard {

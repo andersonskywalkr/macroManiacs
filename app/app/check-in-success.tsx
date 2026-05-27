@@ -32,8 +32,7 @@ export default function CheckInSuccessScreen() {
           Proteína batida. Hoje você não foi frango.
         </Text>
         <Text style={[styles.copy, { color: theme.colors.mutedText }]}>
-          +{result.pointsEarned} pontos · Ranking #{result.rankingPosition} · Feed
-          atualizado.
+          +{result.pointsEarned} pontos · Ranking #{result.rankingPosition} atualizado.
         </Text>
       </ManiacCard>
 

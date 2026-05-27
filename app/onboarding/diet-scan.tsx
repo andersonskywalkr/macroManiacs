@@ -1,183 +1,101 @@
 import { router } from "expo-router";
-import * as DocumentPicker from "expo-document-picker";
-import * as ImagePicker from "expo-image-picker";
-import { Camera, FileText, Image, Keyboard } from "lucide-react-native";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Target } from "lucide-react-native";
+import { useState } from "react";
+import { Alert, StyleSheet, View } from "react-native";
 import { Screen } from "@/components/layout/Screen";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
-import { OnboardingOptionCard } from "@/components/onboarding/OnboardingOptionCard";
 import { ManiacButton } from "@/components/ui/ManiacButton";
-import { useExtractDiet } from "@/hooks/useBackendReadyData";
-import { useState } from "react";
-import type { DietScanPayload } from "@/services/diet.service";
-import { useAppTheme } from "@/store/theme.store";
-
-const scanOptions = [
-  {
-    title: "PDF da nutri",
-    description: "Manda o plano e deixa a IA separar as refeições.",
-    icon: FileText,
-  },
-  {
-    title: "Foto do papel",
-    description: "Tira foto da dieta e transforma em metas.",
-    icon: Camera,
-  },
-  {
-    title: "Imagem salva",
-    description: "Usa print, foto antiga ou arquivo da galeria.",
-    icon: Image,
-  },
-  {
-    title: "Texto manual",
-    description: "Cola sua dieta e segue o jogo.",
-    icon: Keyboard,
-  },
-];
+import { ManiacInput } from "@/components/ui/ManiacInput";
+import { useCreateManualDiet } from "@/hooks/useBackendReadyData";
 
 export default function DietScanScreen() {
-  const theme = useAppTheme();
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [selectedFile, setSelectedFile] = useState<DietScanPayload | null>(null);
-  const extractMutation = useExtractDiet();
+  const [calories, setCalories] = useState("1700");
+  const [protein, setProtein] = useState("125");
+  const [carbs, setCarbs] = useState("140");
+  const [fat, setFat] = useState("55");
+  const manualDietMutation = useCreateManualDiet();
 
-  async function pickDocument(index: number) {
-    setSelectedIndex(index);
-    const result = await DocumentPicker.getDocumentAsync({
-      type: ["application/pdf", "image/*", "text/plain"],
-      copyToCacheDirectory: true,
-    });
+  function createMacroTargets() {
+    const dailyTargets = {
+      calories: Number(calories) || 0,
+      protein: Number(protein) || 0,
+      carbs: Number(carbs) || 0,
+      fat: Number(fat) || 0,
+    };
 
-    if (result.canceled) {
+    if (
+      dailyTargets.calories <= 0 ||
+      dailyTargets.protein <= 0 ||
+      dailyTargets.carbs <= 0 ||
+      dailyTargets.fat <= 0
+    ) {
+      Alert.alert("Revise as metas", "Todos os macros precisam ser maiores que zero.");
       return;
     }
 
-    const asset = result.assets[0];
-    setSelectedFile({
-      sourceType: asset.mimeType?.startsWith("image/") ? "image" : "pdf",
-      fileUri: asset.uri,
-      fileName: asset.name,
-      mimeType: asset.mimeType ?? "application/octet-stream",
-    });
-  }
-
-  async function pickCameraImage(index: number) {
-    setSelectedIndex(index);
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: false,
-      quality: 0.85,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    const asset = result.assets[0];
-    setSelectedFile({
-      sourceType: "image",
-      fileUri: asset.uri,
-      fileName: asset.fileName ?? "diet-photo.jpg",
-      mimeType: asset.mimeType ?? "image/jpeg",
-    });
-  }
-
-  async function pickSavedImage(index: number) {
-    setSelectedIndex(index);
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      quality: 0.9,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    const asset = result.assets[0];
-    setSelectedFile({
-      sourceType: "image",
-      fileUri: asset.uri,
-      fileName: asset.fileName ?? "diet-image.jpg",
-      mimeType: asset.mimeType ?? "image/jpeg",
-    });
-  }
-
-  function handleManualText() {
-    setSelectedIndex(3);
-    setSelectedFile(null);
-    Alert.alert(
-      "Texto manual",
-      "TODO: ligar esta opcao a um formulario de POST /diet. Por enquanto use arquivo, foto ou imagem.",
-    );
-  }
-
-  function processDiet() {
-    if (!selectedFile) {
-      Alert.alert("Selecione uma dieta", "Escolha um PDF, foto ou imagem antes de processar.");
-      return;
-    }
-
-    extractMutation.mutate(selectedFile, {
-      onSuccess: () => router.push("/onboarding/diet-review"),
-      onError: (error) => {
-        Alert.alert(
-          "Nao foi possivel extrair a dieta",
-          error instanceof Error ? error.message : "Tente novamente em alguns minutos.",
-        );
+    manualDietMutation.mutate(
+      {
+        dailyTargets,
+        days: [{ day: 1, dailyTargets, meals: [] }],
       },
-    });
+      {
+        onSuccess: () => router.push("/onboarding/diet-review"),
+        onError: (error) => {
+          Alert.alert(
+            "Nao foi possivel salvar as metas",
+            error instanceof Error ? error.message : "Revise os dados e tente novamente.",
+          );
+        },
+      },
+    );
   }
 
   return (
     <Screen>
       <ScreenHeader
-        eyebrow="Scanner"
-        title="Joga a dieta pra IA."
-        subtitle="Envie PDF, foto ou imagem para o backend extrair refeicoes e macros."
+        eyebrow="Metas"
+        title="Defina seus macros."
+        subtitle="Informe suas metas diarias para liberar o contador do dia."
       />
-      <View style={styles.options}>
-        {scanOptions.map((option, index) => {
-          const Icon = option.icon;
-          return (
-            <OnboardingOptionCard
-              key={option.title}
-              description={option.description}
-              icon={<Icon color="#FFFFFF" size={22} />}
-              onPress={() => {
-                if (index === 0) pickDocument(index);
-                if (index === 1) pickCameraImage(index);
-                if (index === 2) pickSavedImage(index);
-                if (index === 3) handleManualText();
-              }}
-              selected={index === selectedIndex}
-              title={option.title}
-            />
-          );
-        })}
+      <View style={styles.form}>
+        <ManiacInput
+          keyboardType="number-pad"
+          label="Kcal por dia"
+          onChangeText={setCalories}
+          value={calories}
+        />
+        <ManiacInput
+          keyboardType="number-pad"
+          label="Proteina (g)"
+          onChangeText={setProtein}
+          value={protein}
+        />
+        <ManiacInput
+          keyboardType="number-pad"
+          label="Carbo (g)"
+          onChangeText={setCarbs}
+          value={carbs}
+        />
+        <ManiacInput
+          keyboardType="number-pad"
+          label="Gordura (g)"
+          onChangeText={setFat}
+          value={fat}
+        />
       </View>
-      {selectedFile ? (
-        <Text style={[styles.fileName, { color: theme.colors.mutedText }]}>
-          Arquivo selecionado: {selectedFile.fileName}
-        </Text>
-      ) : null}
       <ManiacButton
-        label="Processar dieta"
-        loading={extractMutation.isPending}
-        onPress={processDiet}
+        icon={<Target color="#FFFFFF" size={18} />}
+        label="Salvar metas"
+        loading={manualDietMutation.isPending}
+        onPress={createMacroTargets}
       />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  options: {
+  form: {
     gap: 12,
     marginBottom: 18,
-  },
-  fileName: {
-    fontSize: 13,
-    fontWeight: "800",
-    lineHeight: 18,
-    marginBottom: 14,
-    textAlign: "center",
   },
 });

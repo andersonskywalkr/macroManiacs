@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, CalendarDays, MessageCircle, Send, Trophy, UserPlus, UsersRound } from "lucide-react-native";
+import { ArrowLeft, CalendarDays, Send, Trophy, UserPlus, UsersRound } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   ActionRow,
@@ -106,10 +106,10 @@ export default function GroupDetailScreen() {
       <ScaffoldCard title="Ações">
         <View style={styles.stack}>
           <ActionRow
-            icon={<MessageCircle color={theme.colors.accent} size={22} />}
-            label="Feed do grupo"
-            meta="Veja check-ins e movimentações recentes."
-            onPress={() => router.push(`/app/feed?groupId=${group.id}` as any)}
+            icon={<CalendarDays color={theme.colors.accent} size={22} />}
+            label="Desafios"
+            meta="Veja metas ativas, participe ou crie um novo desafio."
+            onPress={() => router.push(`/app/challenges?groupId=${group.id}` as any)}
           />
           <ActionRow
             icon={<Trophy color={theme.colors.accent} size={22} />}
@@ -121,7 +121,7 @@ export default function GroupDetailScreen() {
             icon={<Send color={theme.colors.accent} size={22} />}
             label="Chat"
             meta="Abra a conversa do grupo."
-            onPress={() => router.push("/app/chat")}
+            onPress={() => router.push(`/app/chat?groupId=${group.id}` as any)}
           />
           <ActionRow
             icon={<UserPlus color={theme.colors.accent} size={22} />}

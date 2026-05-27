@@ -60,7 +60,7 @@ export function normalizeApiError(error: unknown): AppError {
     }
     if (status === 502) {
       return new AppError(
-        "IA temporariamente indisponivel. Tente novamente em alguns minutos.",
+        "Servico temporariamente indisponivel. Tente novamente em alguns minutos.",
         "external_service_error",
         status,
         data,

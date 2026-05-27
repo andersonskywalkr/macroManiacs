@@ -2,6 +2,9 @@ import { AppError } from "./errors";
 import type {
   ApiAvatar,
   ApiBadge,
+  ApiChallenge,
+  ApiChallengeParticipant,
+  ApiChallengeProgress,
   ApiChatMessage,
   ApiCheckInResult,
   ApiDailyMacros,
@@ -25,6 +28,7 @@ import type {
 } from "./dtos";
 import type { Badge, Medal } from "@/types/achievements";
 import type { Avatar } from "@/types/avatar";
+import type { Challenge, ChallengeParticipant, ChallengeProgress } from "@/types/challenge";
 import type { ChatMessage } from "@/types/chat";
 import type { CheckInResult } from "@/types/checkin";
 import type { DietDay, DietDraft, DietMeal, DietMealItem, DietPlan } from "@/types/diet";
@@ -64,6 +68,7 @@ const idOf = (value?: {
   user_id?: string;
   diet_id?: string;
   group_id?: string;
+  challenge_id?: string;
   checkin_id?: string;
   notification_id?: string;
   code?: string;
@@ -73,6 +78,7 @@ const idOf = (value?: {
   value?.user_id ??
   value?.diet_id ??
   value?.group_id ??
+  value?.challenge_id ??
   value?.checkin_id ??
   value?.notification_id ??
   value?.code ??
@@ -475,6 +481,54 @@ export function mapGroup(value: ApiGroup): Group {
     weeklyGoal: value.weeklyGoal ?? value.weekly_goal,
     lastActivity: value.lastActivity ?? value.last_activity,
     role: value.role,
+  };
+}
+
+export function mapChallengeProgress(value: ApiChallengeProgress = {}): ChallengeProgress {
+  return {
+    challengeId: value.challenge_id ?? "",
+    groupId: value.group_id ?? "",
+    userId: value.user_id ?? "",
+    currentProgress: value.current_progress ?? 0,
+    goal: value.goal ?? 0,
+    completed: value.completed ?? false,
+    rewardClaimed: value.reward_claimed ?? false,
+  };
+}
+
+export function mapChallengeParticipant(value: ApiChallengeParticipant): ChallengeParticipant {
+  return {
+    userId: value.user_id ?? idOf(value),
+    name: value.name ?? value.username ?? "Participante",
+    username: value.username,
+    avatar: value.avatar ?? null,
+    currentProgress: value.current_progress ?? value.progress ?? 0,
+    completed: value.completed ?? false,
+  };
+}
+
+export function mapChallenge(value: ApiChallenge): Challenge {
+  const userProgress = value.user_progress ? mapChallengeProgress(value.user_progress) : null;
+
+  return {
+    id: idOf(value),
+    groupId: value.group_id,
+    groupName: value.group_name,
+    createdBy: value.created_by,
+    title: value.title ?? "",
+    description: value.description ?? "",
+    type: value.type ?? "manual",
+    goal: value.goal ?? userProgress?.goal ?? 0,
+    rewardPoints: value.reward_points ?? 0,
+    participantsCount: value.participants_count ?? value.participants?.length ?? 0,
+    status: value.status ?? "active",
+    endDate: value.end_date,
+    daysRemaining: value.days_remaining,
+    currentProgress: value.current_progress ?? userProgress?.currentProgress,
+    completed: value.completed ?? userProgress?.completed,
+    userProgress,
+    participants: (value.participants ?? []).map(mapChallengeParticipant),
+    ranking: (value.ranking ?? []).map(mapChallengeParticipant),
   };
 }
 

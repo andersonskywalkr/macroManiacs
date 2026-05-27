@@ -18,31 +18,45 @@ export default function RegisterScreen() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
   const registerMutation = useMutation({
-    mutationFn: () => authService.register({ name, username, email, password }),
+    mutationFn: () =>
+      authService.register({
+        name: name.trim(),
+        username: username.trim(),
+        email: email.trim(),
+        password,
+      }),
     onSuccess: async (user) => {
+      setFormError(null);
       await setUser(user);
       router.replace("/onboarding/diet-scan");
     },
     onError: (error) => {
+      const message =
+        error instanceof Error ? error.message : "Revise os dados e tente novamente.";
+      setFormError(message);
       Alert.alert(
         "Nao foi possivel criar a conta",
-        error instanceof Error ? error.message : "Revise os dados e tente novamente.",
+        message,
       );
     },
   });
 
   function handleRegister() {
     if (!name.trim() || !username.trim() || !email.trim() || !password.trim()) {
+      setFormError("Preencha nome, username, e-mail e senha.");
       Alert.alert("Complete o cadastro", "Preencha nome, username, e-mail e senha.");
       return;
     }
 
     if (password.length < 6) {
+      setFormError("A senha precisa ter pelo menos 6 caracteres.");
       Alert.alert("Senha curta", "A senha precisa ter pelo menos 6 caracteres.");
       return;
     }
 
+    setFormError(null);
     registerMutation.mutate();
   }
 
@@ -81,6 +95,9 @@ export default function RegisterScreen() {
           O MacroManiacs nao substitui acompanhamento medico ou nutricional. A
           gente organiza e gamifica informacoes fornecidas por voce.
         </Text>
+        {formError ? (
+          <Text style={[styles.error, { color: theme.colors.danger }]}>{formError}</Text>
+        ) : null}
         <ManiacButton
           icon={<Sparkles color="#FFFFFF" size={18} />}
           label="Criar conta"
@@ -100,5 +117,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     lineHeight: 18,
+  },
+  error: {
+    fontSize: 13,
+    fontWeight: "900",
+    lineHeight: 18,
+    textAlign: "center",
   },
 });

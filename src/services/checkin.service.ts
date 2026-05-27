@@ -41,6 +41,15 @@ let latestCheckInResult: CheckInResult | null = null;
 const mockCheckInService = {
   getLastResult: async (): Promise<CheckInResult> =>
     latestCheckInResult ?? useDemoStore.getState().lastCheckIn,
+  getTodayCheckins: async (): Promise<ApiHomeResponse> => ({
+    targets: {},
+    consumed: {},
+    remaining: {},
+    progress_percent: {},
+    checkins: [],
+  }),
+  getRecentCheckins: async (): Promise<ApiCheckInResult[]> => [],
+  getCheckinHistory: async (): Promise<ApiCheckInResult[]> => [],
   confirmBarcode: async (_payload?: BarcodeCheckInPayload): Promise<CheckInResult> =>
     useDemoStore.getState().addCheckIn("barcode", "Rafael escaneou um produto.", {
       calories: 146,
@@ -73,6 +82,13 @@ const mockCheckInService = {
         fat: 15,
       },
     ),
+  repeatCheckin: async (_payload?: RepeatCheckInPayload): Promise<CheckInResult> =>
+    useDemoStore.getState().addCheckIn("manual_macros", "Rafael repetiu uma refeicao.", {
+      calories: 520,
+      protein: 35,
+      carbs: 58,
+      fat: 14,
+    }),
 };
 
 async function hydrateDailyMacros(result: CheckInResult, userId: string): Promise<CheckInResult> {
